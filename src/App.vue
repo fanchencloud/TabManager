@@ -1,0 +1,26 @@
+<script setup>
+import {computed, ref} from "vue";
+import {routes} from "./router.js";
+import NotFound from "./pages/NotFound.vue";
+//默认展示home组件
+const currentPath = ref("/");
+window.addEventListener("hashchange", () => {
+  console.log("hash改变啦", window.location.hash);
+  currentPath.value = window.location.hash.slice(1);
+});
+const currentView = computed(() => {
+  return routes[currentPath.value] || NotFound;
+});
+</script>
+
+<template>
+  <div class="wrapper">
+    <component :is="currentView"></component>
+  </div>
+</template>
+
+<style scoped>
+.wrapper{
+  //border: 1px solid red;
+}
+</style>
