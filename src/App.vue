@@ -1,12 +1,16 @@
 <script setup>
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {routes} from "./router.js";
 import NotFound from "./pages/NotFound.vue";
+
 //默认展示home组件
 const currentPath = ref("/");
 window.addEventListener("hashchange", () => {
-  console.log("hash改变啦", window.location.hash);
-  currentPath.value = window.location.hash.slice(1);
+  const hashUrl = window.location.hash
+  // 去除参数
+  const hashUrlWithoutParam = hashUrl.split('?')[0]
+  // 去除#
+  currentPath.value = hashUrlWithoutParam.substring(1)
 });
 const currentView = computed(() => {
   return routes[currentPath.value] || NotFound;
@@ -20,7 +24,7 @@ const currentView = computed(() => {
 </template>
 
 <style scoped>
-.wrapper{
-  //border: 1px solid red;
+.wrapper {
+//border: 1px solid red;
 }
 </style>

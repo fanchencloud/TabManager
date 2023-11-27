@@ -59,7 +59,6 @@
             <el-button-group class="ml-4">
               <el-button type="success" plain @click="savePages(item.fid)">保存当前打开页面</el-button>
               <el-button type="primary" plain @click="handoff(item.fid)">切换</el-button>
-
               <el-popconfirm
                   title="确定删除当前工作区吗?"
                   confirm-button-text="确认"
@@ -69,7 +68,7 @@
                   <el-button type="danger" plain>删除</el-button>
                 </template>
               </el-popconfirm>
-              <el-button type="info" plain @click="manager">管理</el-button>
+              <el-button type="info" plain @click="manager(item.fid)">管理</el-button>
             </el-button-group>
           </div>
         </el-col>
@@ -92,23 +91,23 @@
 
 <script setup>
 import {ref, onMounted} from 'vue'
-import {dbUtil, TabItem, WorkSpaceItem} from "../common.js";
+import {TabItem, WorkSpaceItem} from "../common.js";
 import {ElNotification} from "element-plus";
+import localforage from "localforage";
 
-const toTest = () => {
-  console.log('toTest')
-  window.location.href = '#/test'
-}
+onMounted(() => {
+  workSpaceList.value = []
+  loadWorkSpaces();
+})
 
 const workSpaceList = ref([])
 
 const workspaceName = ref('')
 const showWarnMessage = ref(false)
 
-const createWorkSpace = () => {
+const createWorkSpace = async () => {
   // 检查工作区名称是否为空
   if (workspaceName.value === '') {
-    console.log('工作区名称不能为空')
     showWarnMessage.value = true
     return false
   }
@@ -117,31 +116,26 @@ const createWorkSpace = () => {
   workSpaceItem.workSpaceName = workspaceName.value
   workSpaceItem.fid = new Date().getTime()
   workSpaceItem.saveDataTime = new Date().toLocaleString()
-  console.log(workSpaceItem)
-  dbUtil.save(workSpaceItem)
+  const res = await localforage.setItem(workSpaceItem.fid, workSpaceItem)
   // 清空工作区名称
   workspaceName.value = ''
   // 刷新工作区列表
-  console.debug('刷新工作区列表')
-  loadWorkSpaces()
+  await loadWorkSpaces()
 }
 
-onMounted(() => {
+/**
+ * 加载工作区列表
+ */
+const loadWorkSpaces = async () => {
   workSpaceList.value = []
-  dbUtil.initDB(loadWorkSpaces);
-})
-
-const loadWorkSpaces = () => {
-  workSpaceList.value = []
-  dbUtil.findAll(workSpaceItems => {
-    // console.log(JSON.stringify(workSpaceItems))
-    // 排序
-    const sortedObjKeys = Object.keys(workSpaceItems).sort();
-    for (let index in sortedObjKeys) {
-      const workSpaceItem = workSpaceItems[sortedObjKeys[index]]
-      workSpaceList.value.push(workSpaceItem)
-    }
-  });
+  const res = await localforage.keys()
+  // 对res进行排序
+  const sortedObjKeys = res.sort();
+  for (let index in sortedObjKeys) {
+    const fid = sortedObjKeys[index]
+    const workSpaceItem = await localforage.getItem(fid)
+    workSpaceList.value.push(workSpaceItem)
+  }
 }
 
 const closeWarnMessage = () => {
@@ -182,7 +176,7 @@ const closeAllTabFun = () => {
  */
 const savePages = async (fid) => {
   // 查询当前工作区
-  const workspaceItem = await dbUtil.findById2(fid)
+  const workspaceItem = await localforage.getItem(fid)
   if (workspaceItem === null) {
     ElNotification({
       message: '工作区不存在',
@@ -196,10 +190,8 @@ const savePages = async (fid) => {
   chrome.tabs.query({
     // 要求标签页在当前窗口中
     currentWindow: true
-  }, (tabs) => {
-    console.debug('当前窗口的标签页数量：' + tabs.length)
+  }, async (tabs) => {
     tabs.forEach(tab => {
-      console.log('遍历标签页：' + JSON.stringify(tab))
       const tabItem = new TabItem()
       tabItem.id = tab.id
       tabItem.title = tab.title
@@ -207,15 +199,14 @@ const savePages = async (fid) => {
       workspaceItem.spaceTabs.push(tabItem)
     })
     // 保存工作区
-    dbUtil.save(workspaceItem)
+    const res = await localforage.setItem(workspaceItem.fid, workspaceItem)
     ElNotification({
       message: '保存成功',
       type: 'success',
     })
     // 刷新工作区列表
-    loadWorkSpaces()
+    await loadWorkSpaces()
   })
-  console.log('保存当前打开页面')
 }
 
 /**
@@ -224,7 +215,7 @@ const savePages = async (fid) => {
  */
 const handoff = async (fid) => {
   // 查询当前工作区
-  const workspaceItem = await dbUtil.findById2(fid)
+  const workspaceItem = await localforage.getItem(fid)
   if (workspaceItem === null) {
     ElNotification({
       message: '工作区不存在',
@@ -261,8 +252,9 @@ const openWorkspace = () => {
         function (tab) {
         }
     );
-    workspaceItemDialog.value = {}
   }
+  workspaceItemDialog.value = {}
+  centerDialogVisible.value = false
 }
 
 /**
@@ -271,7 +263,7 @@ const openWorkspace = () => {
  */
 const deleteWorkspace = async (fid) => {
   // 查询当前工作区
-  const workspaceItem = await dbUtil.findById2(fid)
+  const workspaceItem = await localforage.getItem(fid)
   if (workspaceItem === null) {
     ElNotification({
       message: '工作区不存在',
@@ -279,22 +271,23 @@ const deleteWorkspace = async (fid) => {
     })
     return false
   }
-  dbUtil.del(fid);
-  loadWorkSpaces();
   ElNotification({
     message: '删除成功',
     type: 'success',
   })
+  await localforage.removeItem(fid)
+  await loadWorkSpaces();
 }
-const manager = () => {
-  console.log('保存当前打开页面')
+const manager = (fid) => {
+  window.location.href = '#/workspaceManager?fid=' + fid + '&t=' + new Date().getTime()
 }
 </script>
 
 <style scoped>
 .main {
   width: 700px;
-  min-height: 100px;
+  min-height: 310px;
+  max-height: 500px;
 }
 
 .topForm {
