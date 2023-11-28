@@ -25,6 +25,5 @@ const currentView = computed(() => {
 
 <style scoped>
 .wrapper {
-//border: 1px solid red;
 }
 </style>
