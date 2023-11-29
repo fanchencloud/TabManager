@@ -1,3 +1,5 @@
+import localforage from "localforage";
+
 export const TabItem = function () {
     this.id = "";
     this.title = "";
@@ -26,4 +28,31 @@ export const getQueryVariable = (variable) => {
         }
     }
     return ''
+}
+
+/**
+ * 保存数据
+ * @param key 键
+ * @param data 值
+ * @param serialization 是否序列化
+ */
+export const saveData = async (key, data, serialization = true) => {
+    console.debug("saveData key:" , key + " data:" , data)
+    if (serialization) {
+        data = JSON.stringify(data)
+    }
+    await localforage.setItem(key, data)
+}
+
+export const getData = (key, serialization = true) => {
+    return new Promise((resolve, reject) => {
+        localforage.getItem(key).then((data) => {
+            if (serialization) {
+                data = JSON.parse(data)
+            }
+            resolve(data)
+        }).catch((err) => {
+            reject(err)
+        })
+    })
 }

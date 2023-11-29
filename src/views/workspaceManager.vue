@@ -66,7 +66,7 @@
 
 <script setup>
 import {onMounted, ref} from "vue";
-import {getQueryVariable} from "../common.js";
+import {getData, getQueryVariable, saveData} from "../common.js";
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import {ElNotification} from "element-plus";
 import localforage from "localforage";
@@ -93,7 +93,7 @@ onMounted(async () => {
 
 const loadPageData = async () => {
   // 从数据库中获取工作区信息
-  const item = await localforage.getItem(fid.value)
+  const item = await getData(fid.value)
   if (item === null) {
     ElNotification({
       message: '工作区不存在',
@@ -118,7 +118,7 @@ const view = (pageUrl) => {
   );
 }
 
-const deletePage = (pageId) => {
+const deletePage = async (pageId) => {
   // 遍历工作区中的页面，删除id为pageId的页面
   for (let i = 0; i < workspaceItem.value.spaceTabs.length; i++) {
     const pageItem = workspaceItem.value.spaceTabs[i];
@@ -127,8 +127,9 @@ const deletePage = (pageId) => {
       break
     }
   }
-  // 更新数据库中的工作区信息
-  localforage.setItem(fid.value, workspaceItem.value).then(() => {
+  console.debug(workspaceItem.value)
+  // 更新本地存储
+  saveData(fid.value, workspaceItem.value).then(() => {
     ElNotification({
       message: '删除成功',
       type: 'success',

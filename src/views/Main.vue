@@ -91,7 +91,7 @@
 
 <script setup>
 import {ref, onMounted} from 'vue'
-import {TabItem, WorkSpaceItem} from "../common.js";
+import {getData, saveData, TabItem, WorkSpaceItem} from "../common.js";
 import {ElNotification} from "element-plus";
 import localforage from "localforage";
 
@@ -116,7 +116,7 @@ const createWorkSpace = async () => {
   workSpaceItem.workSpaceName = workspaceName.value
   workSpaceItem.fid = new Date().getTime()
   workSpaceItem.saveDataTime = new Date().toLocaleString()
-  const res = await localforage.setItem(workSpaceItem.fid, workSpaceItem)
+  await saveData(workSpaceItem.fid, workSpaceItem)
   // 清空工作区名称
   workspaceName.value = ''
   // 刷新工作区列表
@@ -133,7 +133,7 @@ const loadWorkSpaces = async () => {
   const sortedObjKeys = res.sort();
   for (let index in sortedObjKeys) {
     const fid = sortedObjKeys[index]
-    const workSpaceItem = await localforage.getItem(fid)
+    const workSpaceItem = await getData(fid)
     workSpaceList.value.push(workSpaceItem)
   }
 }
@@ -176,7 +176,7 @@ const closeAllTabFun = () => {
  */
 const savePages = async (fid) => {
   // 查询当前工作区
-  const workspaceItem = await localforage.getItem(fid)
+  const workspaceItem = await getData(fid)
   if (workspaceItem === null) {
     ElNotification({
       message: '工作区不存在',
@@ -199,7 +199,7 @@ const savePages = async (fid) => {
       workspaceItem.spaceTabs.push(tabItem)
     })
     // 保存工作区
-    const res = await localforage.setItem(workspaceItem.fid, workspaceItem)
+    await saveData(workspaceItem.fid, workspaceItem)
     ElNotification({
       message: '保存成功',
       type: 'success',
@@ -215,7 +215,7 @@ const savePages = async (fid) => {
  */
 const handoff = async (fid) => {
   // 查询当前工作区
-  const workspaceItem = await localforage.getItem(fid)
+  const workspaceItem = await getData(fid)
   if (workspaceItem === null) {
     ElNotification({
       message: '工作区不存在',
@@ -263,7 +263,7 @@ const openWorkspace = () => {
  */
 const deleteWorkspace = async (fid) => {
   // 查询当前工作区
-  const workspaceItem = await localforage.getItem(fid)
+  const workspaceItem = await getData(fid)
   if (workspaceItem === null) {
     ElNotification({
       message: '工作区不存在',
