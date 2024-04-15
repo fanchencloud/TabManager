@@ -36,7 +36,7 @@
         <el-col :span="18">
           <el-tooltip
               class="box-item"
-              effect="dark"
+              effect="light"
               placement="auto-start"
               :content="item.title"
           >
@@ -46,8 +46,8 @@
         <el-col :span="6">
           <div class="operations">
             <el-button-group class="ml-4">
-              <el-button type="primary" :icon="View" @click="view(item.url)">查看</el-button>
-              <el-button type="danger" @click="deletePage(item.id)">
+              <el-button type="primary" plain :icon="View" @click="view(item.url)">查看</el-button>
+              <el-button type="danger" plain @click="deletePage(item.id)">
                 删除
                 <el-icon class="el-icon--right">
                   <Delete/>

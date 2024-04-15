@@ -22,8 +22,7 @@
               <el-button type="danger" plain>关闭所有打开的页面</el-button>
             </template>
           </el-popconfirm>
-          <el-button type="info" plain>导出数据</el-button>
-          <el-button type="success" plain>导入数据</el-button>
+          <el-button type="success" plain @click="dataSync">数据同步</el-button>
         </el-button-group>
       </div>
     </div>
@@ -94,6 +93,7 @@ import {ref, onMounted} from 'vue'
 import {getData, saveData, TabItem, WorkSpaceItem} from "../common.js";
 import {ElNotification} from "element-plus";
 import localforage from "localforage";
+import {requestDataSync} from "../api/index.js";
 
 onMounted(() => {
   workSpaceList.value = []
@@ -281,6 +281,16 @@ const deleteWorkspace = async (fid) => {
 const manager = (fid) => {
   window.location.href = '#/workspaceManager?fid=' + fid + '&t=' + new Date().getTime()
 }
+
+/* 数据同步 start */
+const dataSync = async () => {
+  console.debug("数据同步")
+  // 获取所有的工作区
+  console.log('workSpaceList:', workSpaceList.value)
+  await requestDataSync()
+}
+/* 数据同步 end */
+
 </script>
 
 <style scoped>
