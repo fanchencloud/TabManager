@@ -94,6 +94,7 @@ import {getData, saveData, TabItem, WorkSpaceItem} from "../common.js";
 import {ElNotification} from "element-plus";
 import localforage from "localforage";
 import {requestDataSync} from "../api/index.js";
+import dayjs from "dayjs";
 
 onMounted(() => {
   workSpaceList.value = []
@@ -115,7 +116,7 @@ const createWorkSpace = async () => {
   const workSpaceItem = new WorkSpaceItem()
   workSpaceItem.workSpaceName = workspaceName.value
   workSpaceItem.fid = new Date().getTime()
-  workSpaceItem.saveDataTime = new Date().toLocaleString()
+  workSpaceItem.saveDataTime = dayjs().format("yyyy/MM/dd HH:mm:ss")
   await saveData(workSpaceItem.fid, workSpaceItem)
   // 清空工作区名称
   workspaceName.value = ''
@@ -184,7 +185,9 @@ const savePages = async (fid) => {
     })
     return false
   }
-  workspaceItem.saveDataTime = new Date().toLocaleString()
+  // 更新工作区的保存时间
+  workspaceItem.saveDataTime = dayjs().format("yyyy/MM/dd HH:mm:ss")
+  // 清空工作区的标签页
   workspaceItem.spaceTabs.length = 0;
   // 查询当前窗口的所有标签页
   chrome.tabs.query({
@@ -287,7 +290,27 @@ const dataSync = async () => {
   console.debug("数据同步")
   // 获取所有的工作区
   console.log('workSpaceList:', workSpaceList.value)
-  await requestDataSync()
+  const res = await requestDataSync(workSpaceList.value)
+  console.debug('数据同步结果:', res)
+  const {code, data} = res
+  if (code === 200) {
+    ElNotification({
+      message: '数据同步成功',
+      type: 'success',
+    })
+    workSpaceList.value.length = 0
+    for (let i = 0; i < data.length; i++) {
+      const workSpaceItem = data[i]
+      workSpaceList.value.push(workSpaceItem)
+      // 保存工作区
+      await saveData(workSpaceItem.fid, workSpaceItem)
+    }
+  } else {
+    ElNotification({
+      message: '数据同步失败',
+      type: 'error',
+    })
+  }
 }
 /* 数据同步 end */
 

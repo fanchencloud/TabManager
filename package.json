@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "dayjs": "^1.11.10",
     "element-plus": "^2.4.2",
     "localforage": "^1.10.0",
     "vue": "^3.3.8"

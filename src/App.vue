@@ -16,10 +16,6 @@ window.addEventListener("hashchange", () => {
 const currentView = computed(() => {
   return routes[currentPath.value] || NotFound;
 });
-
-onMounted(() => {
-  requestDataSync()
-})
 </script>
 
 <template>

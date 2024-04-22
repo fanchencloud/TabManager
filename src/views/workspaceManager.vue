@@ -74,6 +74,7 @@ import {Delete, View,} from '@element-plus/icons-vue'
 
 const locale = ref(zhCn)
 
+// 工作区的主键ID
 const fid = ref('')
 
 /**
@@ -128,6 +129,8 @@ const deletePage = async (pageId) => {
     }
   }
   console.debug(workspaceItem.value)
+  // 更新保存时间
+  workspaceItem.value.saveDataTime = dayjs().format("yyyy/MM/dd HH:mm:ss")
   // 更新本地存储
   saveData(fid.value, workspaceItem.value).then(() => {
     ElNotification({

@@ -3,12 +3,21 @@ import {handleFetchResponse} from "./requestUtils.js";
 export const requestDataSync = async (tabData) => {
     // const res = await
     const res = await handleFetchResponse(() =>
-        fetch("https://qqlykm.cn/api/free/ip/get", {
-            method: "GET",
+        fetch("http://local.chen.cn:8080/api/dataSync", {
+            method: "POST",
             mode: "cors", // no-cors, *cors, same-origin
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset:utf-8;"
-            }
+                "Content-Type": "application/json"
+                // "Content-Type": "application/x-www-form-urlencoded;charset:utf-8;"
+            },
+            body: JSON.stringify(tabData),
         }))
-    console.debug('requestDataSync res: {}', res)
+    // 拦截未登录等情况
+    const {code} = res
+    if (code === 401) {
+        // 未登录
+        console.debug('未登录')
+        return
+    }
+    return res
 }

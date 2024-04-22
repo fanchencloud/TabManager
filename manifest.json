@@ -19,6 +19,7 @@
   },
   "homepage_url": "https://www.fanchencloud.cn",
   "host_permissions": [
-    "*://*.qqlykm.cn/*"
+    "*://*.qqlykm.cn/*",
+    "*://*.fanchencloud.cn/*"
   ]
 }
