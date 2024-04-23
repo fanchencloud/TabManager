@@ -95,6 +95,7 @@ import {ElNotification} from "element-plus";
 import localforage from "localforage";
 import {requestDataSync} from "../api/index.js";
 import dayjs from "dayjs";
+import Snowflake from "../utils/Snowflake.js";
 
 onMounted(() => {
   workSpaceList.value = []
@@ -115,7 +116,7 @@ const createWorkSpace = async () => {
   showWarnMessage.value = false
   const workSpaceItem = new WorkSpaceItem()
   workSpaceItem.workSpaceName = workspaceName.value
-  workSpaceItem.fid = new Date().getTime()
+  workSpaceItem.fid = Snowflake.getInstance().NextId()
   workSpaceItem.saveDataTime = dayjs().format("yyyy/MM/dd HH:mm:ss")
   await saveData(workSpaceItem.fid, workSpaceItem)
   // 清空工作区名称
@@ -196,7 +197,7 @@ const savePages = async (fid) => {
   }, async (tabs) => {
     tabs.forEach(tab => {
       const tabItem = new TabItem()
-      tabItem.id = tab.id
+      tabItem.id = tab.id || Snowflake.getInstance().NextId()
       tabItem.title = tab.title
       tabItem.url = tab.url
       workspaceItem.spaceTabs.push(tabItem)

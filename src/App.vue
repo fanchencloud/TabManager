@@ -1,8 +1,7 @@
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, ref} from "vue";
 import {routes} from "./router.js";
 import NotFound from "./pages/NotFound.vue";
-import {requestDataSync} from "./api/index.js";
 
 //默认展示home组件
 const currentPath = ref("/");
