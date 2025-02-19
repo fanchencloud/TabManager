@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, ref} from "vue";
 import {routes} from "./router.js";
 import NotFound from "./pages/NotFound.vue";
 
